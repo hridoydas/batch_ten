@@ -1,0 +1,264 @@
+{
+	"info": {
+		"_postman_id": "a0899569-6ef9-4cd6-aa8f-523f3051feb3",
+		"name": "batch_10",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12828237"
+	},
+	"item": [
+		{
+			"name": "search",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"pm.collectionVariables.set(\"searched_product\", \"Nike react infinity\");"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseBody = pm.response.json();",
+							"",
+							"pm.test(\"Verify status code is 200\", ()=> {",
+							"    pm.expect(200).to.eql(pm.response.code);",
+							"});",
+							"const item = responseBody.eContext.graphqlResponse.e248uix4m5ibqamf.items[0];",
+							"const actualResult = item.name;",
+							"const productId = item.productId;",
+							"const expectedResult = pm.collectionVariables.get(\"searched_product\");",
+							"",
+							"pm.test(\"Verify valid searched product is showing\", ()=> {",
+							"    pm.expect(actualResult).to.include(expectedResult);",
+							"});",
+							"const productName = (actualResult.split(' ').join('-')+ `-${productId}`).toLowerCase();",
+							"pm.collectionVariables.set(\"product_name\", productName)"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://demo.evershop.io/search?keyword={{searched_product}}&ajax=true",
+					"protocol": "https",
+					"host": [
+						"demo",
+						"evershop",
+						"io"
+					],
+					"path": [
+						"search"
+					],
+					"query": [
+						{
+							"key": "keyword",
+							"value": "{{searched_product}}"
+						},
+						{
+							"key": "ajax",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "productDetails",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseBody = pm.response.json();",
+							"",
+							"pm.test(\"Verify status code is 200\", () => {",
+							"    pm.expect(200).to.eql(pm.response.code);",
+							"});",
+							"",
+							"pm.test(\"Verify success is true\", () => {",
+							"    pm.expect(true).to.eql(responseBody.success);",
+							"});",
+							"const productSku = responseBody.eContext.graphqlResponse.e248uix4m5ibqb60.sku;",
+							"pm.collectionVariables.set(\"product_sku\", productSku);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://demo.evershop.io/{{product_name}}?ajax=true",
+					"protocol": "https",
+					"host": [
+						"demo",
+						"evershop",
+						"io"
+					],
+					"path": [
+						"{{product_name}}"
+					],
+					"query": [
+						{
+							"key": "ajax",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "addtocart",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"",
+							"pm.test(\"Verify status code is 200\", () => {",
+							"    pm.expect(200).to.eql(pm.response.code);",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"function getRandomInt(min, max) {",
+							"  const minCeiled = Math.ceil(min);",
+							"  const maxFloored = Math.floor(max);",
+							"  return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled);",
+							"}",
+							"",
+							"const productQty = getRandomInt(1,2);",
+							"pm.collectionVariables.set(\"product_qty\", productQty);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "_ga=GA1.2.769420754.1725049828; __stripe_mid=87e52dc8-a50f-4600-b1a0-3d649c43d5449846ea; sid=s%3ALTl3cceDKPnn4BCt4LVMtDs94DaqxPA1.JiIX025lTDAh2Thcu9RkMA1XEccC3lM4H%2B42G6xdR%2Fg",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"qty\": \"{{product_qty}}\",\n    \"sku\": \"{{product_sku}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://demo.evershop.io/api/cart/mine/items",
+					"protocol": "https",
+					"host": [
+						"demo",
+						"evershop",
+						"io"
+					],
+					"path": [
+						"api",
+						"cart",
+						"mine",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "viewCart",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://demo.evershop.io/cart?ajax=true&Cookie=_ga=GA1.2.769420754.1725049828; __stripe_mid=87e52dc8-a50f-4600-b1a0-3d649c43d5449846ea; sid=s%3ALTl3cceDKPnn4BCt4LVMtDs94DaqxPA1.JiIX025lTDAh2Thcu9RkMA1XEccC3lM4H%2B42G6xdR%2Fg",
+					"protocol": "https",
+					"host": [
+						"demo",
+						"evershop",
+						"io"
+					],
+					"path": [
+						"cart"
+					],
+					"query": [
+						{
+							"key": "ajax",
+							"value": "true"
+						},
+						{
+							"key": "Cookie",
+							"value": "_ga=GA1.2.769420754.1725049828; __stripe_mid=87e52dc8-a50f-4600-b1a0-3d649c43d5449846ea; sid=s%3ALTl3cceDKPnn4BCt4LVMtDs94DaqxPA1.JiIX025lTDAh2Thcu9RkMA1XEccC3lM4H%2B42G6xdR%2Fg"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "searched_product",
+			"value": ""
+		},
+		{
+			"key": "product_name",
+			"value": ""
+		},
+		{
+			"key": "product_sku",
+			"value": ""
+		},
+		{
+			"key": "product_qty",
+			"value": ""
+		}
+	]
+}
